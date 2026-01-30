@@ -4,7 +4,8 @@
     {
         Block,
         Unblock,
-        Delete
+        Delete,
+        DeleteUnverified
     }
 
     public class UserActionDto

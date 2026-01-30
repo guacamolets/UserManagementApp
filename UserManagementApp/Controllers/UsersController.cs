@@ -55,6 +55,9 @@ namespace UserManagementApp.Controllers
                 case UserAction.Delete:
                     _db.Users.RemoveRange(users);
                     break;
+                case UserAction.DeleteUnverified:
+                    _db.Users.RemoveRange(users.Where(u => u.Status == "unverified"));
+                    break;
                 default:
                     return BadRequest(new { message = "Invalid action" });
             }
