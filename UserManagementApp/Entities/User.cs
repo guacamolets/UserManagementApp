@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UserManagementApp.API.Entities
+namespace UserManagementApp.Entities
 {
     public class User
     {
@@ -17,7 +17,7 @@ namespace UserManagementApp.API.Entities
 
         public string Status { get; set; } = "unverified"; // unverified / active / blocked
 
-        public DateTime? LastLogin { get; set; }
+        public DateTime? LastLogin { get; set; } = DateTime.UtcNow;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

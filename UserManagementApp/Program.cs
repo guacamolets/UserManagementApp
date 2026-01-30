@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using UserManagementApp.API.Data;
+using UserManagementApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

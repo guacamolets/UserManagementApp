@@ -1,14 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UserManagementApp.API.Entities;
+using UserManagementApp.Entities;
 
-namespace UserManagementApp.API.Data
+namespace UserManagementApp.Data
 {
     public class UserDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
 
-        public UserDbContext(DbContextOptions<UserDbContext> options)
-            : base(options)
+        public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)
         { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
