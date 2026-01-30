@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using UserManagementApp.Data;
+using UserManagementApp.Dto;
 
 namespace UserManagementApp.Controllers
 {
@@ -6,15 +9,58 @@ namespace UserManagementApp.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        [HttpGet(Name = "GetUsers")]
-        public IEnumerable<IActionResult> GetUsers()
+        private readonly UserDbContext _db;
+
+        public UsersController(UserDbContext db)
         {
-            return new List<IActionResult>
+            _db = db;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await _db.Users
+            .OrderByDescending(u => u.LastLogin)
+            .Select(u => new
             {
-                Ok(new { Id = 1, Name = "Alice", Age = 30 }),
-                Ok(new { Id = 2, Name = "Bob", Age = 25 }),
-                Ok(new { Id = 3, Name = "Charlie", Age = 35 })
-            };
+                u.Id,
+                u.Name,
+                u.Email,
+                u.LastLogin,
+                u.Status
+            })
+            .ToListAsync();
+
+            return Ok(users);
+        }
+
+        [HttpPost("action")]
+        public async Task<IActionResult> ExecuteUserAction([FromBody] UserActionDto dto)
+        {
+            if (dto.UserIds == null || !dto.UserIds.Any())
+            {
+                return BadRequest(new { message = "No users selected" });
+            }
+
+            var users = await _db.Users.Where(u => dto.UserIds.Contains(u.Id)).ToListAsync();
+
+            switch (dto.Action)
+            {
+                case UserAction.Block:
+                    users.ForEach(u => u.Status = "blocked");
+                    break;
+                case UserAction.Unblock:
+                    users.ForEach(u => u.Status = "active");
+                    break;
+                case UserAction.Delete:
+                    _db.Users.RemoveRange(users);
+                    break;
+                default:
+                    return BadRequest(new { message = "Invalid action" });
+            }
+
+            await _db.SaveChangesAsync();
+            return Ok(new { message = "Action completed successfully" });
         }
     }
 }
