@@ -1,6 +1,6 @@
 @UserManagementApp_HostAddress = http://localhost:5245
 
-GET {{UserManagementApp_HostAddress}}/weatherforecast/
+GET {{UserManagementApp_HostAddress}}/usermanagement/
 Accept: application/json
 
 ###
