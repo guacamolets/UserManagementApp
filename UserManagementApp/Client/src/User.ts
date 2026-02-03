@@ -1,4 +1,4 @@
-export type UserStatus = "active" | "blocked";
+export type UserStatus = "active" | "blocked" | "unverified";
 
 export interface UserDto {
     id: number;
@@ -8,4 +8,4 @@ export interface UserDto {
     status: UserStatus;
 }
 
-export type UserAction = "block" | "unblock" | "delete";
+export type UserAction = "Block" | "Unblock" | "Delete" | "DeleteUnverified";

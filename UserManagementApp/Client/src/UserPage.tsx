@@ -3,12 +3,14 @@ import { type UserDto } from "./User";
 import Toolbar from "./Toolbar";
 import UserTable from "./UserTable";
 
+const API_BASE = "https://localhost:7127";
+
 export function UserPage() {
     const [users, setUsers] = useState<UserDto[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
     function fetchUsers() {
-        fetch("/api/users")
+        fetch(`${API_BASE}/api/users`)
             .then(res => {
                 if (!res.ok) {
                     throw new Error("err");
@@ -33,7 +35,14 @@ export function UserPage() {
     }
 
     function executeAction(action: string) {
-        fetch("/api/users/action", {
+        if (selectedIds.length === 0) {
+            console.warn("No users selected");
+            return;
+        }
+
+        console.log("Executing action", action, selectedIds);
+
+        fetch("https://localhost:7127/api/users/action", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -44,9 +53,14 @@ export function UserPage() {
             })
         })
             .then(res => {
+                console.log("status:", res.status);
                 if (!res.ok) {
-                    throw new Error("err");
+                    return res.json().then(err => {
+                        console.error("Server error:", err);
+                        throw new Error("Request failed");
+                    }).catch(() => { throw new Error("Request failed"); });
                 }
+                return res.json().catch(() => ({}));
             })
             .then(() => {
                 setSelectedIds([]);
@@ -59,7 +73,7 @@ export function UserPage() {
         <div>
             <h2>Users</h2>
 
-            <Toolbar onAction={executeAction} selectedIds={[]}/>
+            <Toolbar onAction={executeAction} selectedIds={selectedIds}/>
             <UserTable users={users} selectedIds={selectedIds}
                 onToggle={toggleUser} onToggleAll={function(): void {
                     throw new Error("Function not implemented.");
