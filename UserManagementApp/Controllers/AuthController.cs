@@ -1,8 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using UserManagementApp.Data;
-using UserManagementApp.Entities;
 using UserManagementApp.Dto;
+using UserManagementApp.Entities;
 
 namespace UserManagementApp.Controllers
 {
@@ -10,11 +16,14 @@ namespace UserManagementApp.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly UserDbContext _db;
+        private readonly UserDbContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly PasswordHasher<User> _passwordHasher = new();
 
-        public AuthController(UserDbContext db)
+        public AuthController(UserDbContext context, IConfiguration configuration)
         {
-            _db = db;
+            _context = context;
+            _configuration = configuration;
         }
 
         [HttpPost("register")]
@@ -30,11 +39,13 @@ namespace UserManagementApp.Controllers
                 PasswordHash = dto.Password
             };
 
-            _db.Users.Add(user);
+            user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
+
+            _context.Users.Add(user);
 
             try
             {
-                await _db.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
                 var confirmationLink = $"https://your-app.com/api/auth/confirm/{user.Id}";
                 Console.WriteLine($"[Async email] Confirmation link for {user.Email}: {confirmationLink}");
@@ -54,7 +65,7 @@ namespace UserManagementApp.Controllers
         [HttpGet("confirm/{userId}")]
         public async Task<IActionResult> ConfirmEmail(int userId)
         {
-            var user = await _db.Users.FindAsync(userId);
+            var user = await _context.Users.FindAsync(userId);
             if (user == null)
                 return NotFound(new { message = "User not found" });
 
@@ -64,28 +75,62 @@ namespace UserManagementApp.Controllers
             if (user.Status == "unverified")
                 user.Status = "active";
 
-            await _db.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             return Ok(new { message = "Email confirmed, status active" });
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserRegistrationDto dto)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+
             if (user == null)
-                return BadRequest(new { message = "Invalid email" });
-
-            if (user.Status == "blocked")
-                return BadRequest(new { message = "User has been blocked" });
-
-            if (user.PasswordHash != dto.Password)
-                return BadRequest(new { message = "Invalid password" });
+                return Unauthorized("Invalid credentials");
+            //if (user.Status == "blocked")
+            //    return Forbid("User is blocked");
+            var result = _passwordHasher.VerifyHashedPassword(
+                user,
+                user.PasswordHash,
+                dto.Password
+            );
+            if (result == PasswordVerificationResult.Failed)
+                return Unauthorized("Invalid credentials");
 
             user.LastLogin = DateTime.UtcNow;
-            await _db.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Login successful", status = user.Status });
+            var token = GenerateJwtToken(user);
+
+            return Ok(new { token });
         }
+
+        private string GenerateJwtToken(User user)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email)
+                //new Claim("isBlocked", user.Status)
+            };
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)
+            );
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(2),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
     }
 }

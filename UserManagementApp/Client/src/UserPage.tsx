@@ -1,28 +1,32 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "./api";
 import { type UserDto } from "./User";
 import Toolbar from "./Toolbar";
 import UserTable from "./UserTable";
 
-const API_BASE = "https://localhost:7127";
+//const API_BASE = "https://localhost:7127";
 
-export function UserPage() {
+export default function UserPage() {
     const [users, setUsers] = useState<UserDto[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-    function fetchUsers() {
-        fetch(`${API_BASE}/api/users`)
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error("err");
-                }
-                return res.json();
-            })
-            .then(data => setUsers(data))
-            .catch(err => alert(err.message));
+    async function loadUsers() {
+        try {
+            const data = await apiFetch("https://localhost:7127/api/users");
+            setUsers(data);
+            setSelectedIds([]);
+        } catch (err) {
+            console.error("Users loading error:", err);
+            alert("Users loading error");
+        }
     }
 
     useEffect(() => {
-        fetchUsers();
+        const fetchData = async () => {
+            await loadUsers();
+        };
+
+        fetchData();
     }, []);
 
     function toggleUser(id: number) {
@@ -34,50 +38,16 @@ export function UserPage() {
         });
     }
 
-    function executeAction(action: string) {
-        if (selectedIds.length === 0) {
-            console.warn("No users selected");
-            return;
-        }
-
-        console.log("Executing action", action, selectedIds);
-
-        fetch("https://localhost:7127/api/users/action", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                userIds: selectedIds,
-                action: action
-            })
-        })
-            .then(res => {
-                console.log("status:", res.status);
-                if (!res.ok) {
-                    return res.json().then(err => {
-                        console.error("Server error:", err);
-                        throw new Error("Request failed");
-                    }).catch(() => { throw new Error("Request failed"); });
-                }
-                return res.json().catch(() => ({}));
-            })
-            .then(() => {
-                setSelectedIds([]);
-                fetchUsers();
-            })
-            .catch(err => alert(err.message));
+    function toggleAllUser(checked: boolean) {
+        setSelectedIds(checked ? users.map(u => u.id) : []);
     }
 
     return (
-        <div>
-            <h2>Users</h2>
-
-            <Toolbar onAction={executeAction} selectedIds={selectedIds}/>
+        <>
+            <Toolbar onAction={loadUsers} selectedIds={selectedIds}/>
             <UserTable users={users} selectedIds={selectedIds}
-                onToggle={toggleUser} onToggleAll={function(): void {
-                    throw new Error("Function not implemented.");
-                } }/>
-        </div>
+                onToggle={toggleUser} onToggleAll={toggleAllUser}
+            />
+        </>
     );
 }

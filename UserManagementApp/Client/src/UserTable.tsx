@@ -4,7 +4,7 @@ interface Props {
     users: UserDto[];
     selectedIds: number[];
     onToggle: (id: number) => void;
-    onToggleAll: () => void;
+    onToggleAll: (checked: boolean) => void;
 }
 
 export default function UserTable({ users, selectedIds, onToggle, onToggleAll }: Props) {
@@ -15,7 +15,7 @@ export default function UserTable({ users, selectedIds, onToggle, onToggleAll }:
             <thead>
                 <tr>
                     <th>
-                        <input type="checkbox" checked={allChecked} onChange={onToggleAll} />
+                        <input type="checkbox" checked={allChecked} onChange={e => onToggleAll(e.target.checked)} />
                     </th>
                     <th>Name</th>
                     <th>Email</th>
