@@ -20,5 +20,8 @@ namespace UserManagementApp.Entities
         public DateTime? LastLogin { get; set; } = DateTime.UtcNow;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public string EmailConfirmationToken { get; set; }
+        public DateTime? EmailConfirmationTokenExpires { get; set; }
     }
 }

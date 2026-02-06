@@ -3,6 +3,7 @@ import { type JSX } from "react";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
 import UserPage from "./UserPage";
+import ConfirmEmailPage from "./ConfirmEmailPage";
 import { getToken } from "./auth";
 import './App.css'
 
@@ -17,6 +18,7 @@ export default function App() {
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/confirm" element={<ConfirmEmailPage />} />
                 <Route path="/users"element={<PrivateRoute><UserPage /></PrivateRoute>}/>
                 <Route path="*" element={<h1>404 Not Found</h1>} />
             </Routes>

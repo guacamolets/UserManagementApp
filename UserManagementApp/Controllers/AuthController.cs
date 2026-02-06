@@ -9,6 +9,7 @@ using System.Text;
 using UserManagementApp.Data;
 using UserManagementApp.Dto;
 using UserManagementApp.Entities;
+using UserManagementApp.Services;
 
 namespace UserManagementApp.Controllers
 {
@@ -18,12 +19,16 @@ namespace UserManagementApp.Controllers
     {
         private readonly UserDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly PasswordHasher<User> _passwordHasher = new();
+        private readonly IEmailService _emailService;
+        private readonly IPasswordHasher<User> _passwordHasher;
 
-        public AuthController(UserDbContext context, IConfiguration configuration)
+        public AuthController(UserDbContext context, IConfiguration configuration, 
+            IPasswordHasher<User> passwordHasher, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
+            _passwordHasher = passwordHasher;
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -36,7 +41,10 @@ namespace UserManagementApp.Controllers
                 Status = "unverified",
                 LastLogin = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
-                PasswordHash = dto.Password
+                PasswordHash = dto.Password,
+                EmailConfirmationToken = Guid.NewGuid().ToString("N"),
+                EmailConfirmationTokenExpires = DateTime.UtcNow.AddHours(24)
+
             };
 
             user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
@@ -45,10 +53,12 @@ namespace UserManagementApp.Controllers
 
             try
             {
+                var confirmationLink = $"http://localhost:5173/confirm?token={user.EmailConfirmationToken}";
                 await _context.SaveChangesAsync();
 
-                var confirmationLink = $"https://your-app.com/api/auth/confirm/{user.Id}";
-                Console.WriteLine($"[Async email] Confirmation link for {user.Email}: {confirmationLink}");
+                //Task.Run(() => _emailService.SendConfirmationEmailAsync(user.Email, confirmationLink));
+
+                await _emailService.SendConfirmationEmailAsync(user.Email, confirmationLink);
             }
             catch (DbUpdateException ex)
             {
@@ -58,26 +68,32 @@ namespace UserManagementApp.Controllers
                 }
                 throw;
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
 
             return Ok(new { message = "Registration successful, status unverified" });
         }
 
-        [HttpGet("confirm/{userId}")]
-        public async Task<IActionResult> ConfirmEmail(int userId)
+        [HttpGet("confirm")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string token)
         {
-            var user = await _context.Users.FindAsync(userId);
+            if (string.IsNullOrWhiteSpace(token))
+                return BadRequest("Token missing");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u =>
+                u.EmailConfirmationToken == token);
+
             if (user == null)
-                return NotFound(new { message = "User not found" });
+                return BadRequest("Invalid or expired token");
 
-            if (user.Status == "blocked")
-                return BadRequest(new { message = "User has been blocked" });
-
-            if (user.Status == "unverified")
-                user.Status = "active";
+            user.Status = "active";
+            user.EmailConfirmationToken = string.Empty;
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Email confirmed, status active" });
+            return Ok("Email confirmed successfully, status active");
         }
 
         [HttpPost("login")]
@@ -87,8 +103,8 @@ namespace UserManagementApp.Controllers
 
             if (user == null)
                 return Unauthorized("Invalid credentials");
-            //if (user.Status == "blocked")
-            //    return Forbid("User is blocked");
+            if (user.Status == "blocked")
+                return Forbid("User is blocked");
             var result = _passwordHasher.VerifyHashedPassword(
                 user,
                 user.PasswordHash,
