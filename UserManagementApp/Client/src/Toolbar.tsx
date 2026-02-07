@@ -26,10 +26,10 @@ export default function Toolbar({ selectedIds, onAction }: Props) {
 
     return (
         <div>
-            <button disabled={disabled} onClick={() => executeAction("Block")}>Block</button>
-            <button disabled={disabled} onClick={() => executeAction("Unblock")}>Unblock</button>
-            <button disabled={disabled} onClick={() => executeAction("Delete")}>Delete</button>
-            <button disabled={disabled} onClick={() => executeAction("DeleteUnverified")}>Delete unverified</button>
+            <button disabled={disabled} title="Blocks selected users and prevents login" onClick={() => executeAction("Block")}>Block</button>
+            <button disabled={disabled} title="Unblock selected users and allow login" onClick={() => executeAction("Unblock")}>Unblock</button>
+            <button disabled={disabled} title="Delete selected users permanently" onClick={() => executeAction("Delete")}>Delete</button>
+            <button disabled={disabled} title="Delete unverified selected permanently" onClick={() => executeAction("DeleteUnverified")}>Delete unverified</button>
         </div>
     );
 }

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -55,11 +54,8 @@ namespace UserManagementApp.Controllers
             try
             {
                 var confirmationLink = $"{_configuration["FrontendUrl"]}/confirm?token={user.EmailConfirmationToken}";
-                
+
                 await _context.SaveChangesAsync();
-
-                //Task.Run(() => _emailService.SendConfirmationEmailAsync(user.Email, confirmationLink));
-
                 await _emailService.SendConfirmationEmailAsync(user.Email, confirmationLink);
             }
             catch (DbUpdateException ex)
@@ -106,13 +102,16 @@ namespace UserManagementApp.Controllers
 
             if (user == null)
                 return Unauthorized("Invalid credentials");
+
             if (user.Status == "blocked")
                 return Forbid("User is blocked");
+
             var result = _passwordHasher.VerifyHashedPassword(
                 user,
                 user.PasswordHash,
                 dto.Password
             );
+
             if (result == PasswordVerificationResult.Failed)
                 return Unauthorized("Invalid credentials");
 
@@ -131,7 +130,6 @@ namespace UserManagementApp.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
-                //new Claim("isBlocked", user.Status)
             };
 
             var key = new SymmetricSecurityKey(

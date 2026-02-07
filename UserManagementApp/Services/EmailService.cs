@@ -37,17 +37,13 @@ namespace UserManagementApp.Services
                     SecureSocketOptions.StartTls
                 );
                 await client.AuthenticateAsync(
-            _settings.Username,
-            _settings.Password
-        );
+                    _settings.Username,
+                    _settings.Password
+                );
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
-                //client.EnableSsl = true;
-                //client.Credentials = new NetworkCredential(_settings.Username, _settings.Password);
 
                 Console.WriteLine($"[DEBUG] Sending confirmation email to {email} with link {confirmationLink}");
-
-                //await client.SendMailAsync(message);
             }
             catch (Exception ex)
             {

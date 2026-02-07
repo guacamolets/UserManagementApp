@@ -3,12 +3,12 @@ import { apiFetch } from "./api";
 import { type UserDto } from "./User";
 import Toolbar from "./Toolbar";
 import UserTable from "./UserTable";
-
-//const API_BASE = "https://localhost:7127";
+import { useToastContext } from "./ToastContext";
 
 export default function UserPage() {
     const [users, setUsers] = useState<UserDto[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const { showToast } = useToastContext();
 
     async function loadUsers() {
         try {
@@ -17,7 +17,7 @@ export default function UserPage() {
             setSelectedIds([]);
         } catch (err) {
             console.error("Users loading error:", err);
-            alert("Users loading error");
+            showToast("Users loading error", "error");
         }
     }
 

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setToken } from "./auth";
+import { useToastContext } from "./ToastContext";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const { showToast } = useToastContext();
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
@@ -17,7 +19,7 @@ export default function LoginPage() {
         });
 
         if (!res.ok) {
-            alert("Login error");
+            showToast("Login error", "error");
             return;
         }
 
@@ -27,13 +29,15 @@ export default function LoginPage() {
     }
 
     return (
-        <form onSubmit={handleLogin}>
-            <h2>Login</h2>
+        <div className="auth-page">
+            <div className="auth-card">
+                <h2>Login</h2>
 
-            <div><label>Email</label><input value={email} onChange={e => setEmail(e.target.value)} /></div>
-            <div><label>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} /></div>
+                <div className="form-field"><label>Email</label><input value={email} onChange={e => setEmail(e.target.value)} /></div>
+                <div className="form-field"><label>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} /></div>
 
-            <button>Log in</button>
-        </form>
+                <button className="auth-button" onClick={handleLogin}>Login</button>
+            </div>
+        </div>
     );
 }
