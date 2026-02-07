@@ -17,9 +17,11 @@ export default function UserTable({ users, selectedIds, onToggle, onToggleAll }:
                     <th>
                         <input type="checkbox" checked={allChecked} onChange={e => onToggleAll(e.target.checked)} />
                     </th>
+                    <th>ID</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Status</th>
+                    <th>Last Login</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,9 +34,11 @@ export default function UserTable({ users, selectedIds, onToggle, onToggleAll }:
                                 onChange={() => onToggle(u.id)}
                             />
                         </td>
+                        <td>{u.id}</td>
                         <td>{u.name}</td>
                         <td>{u.email}</td>
                         <td>{u.status}</td>
+                        <td>{u.lastLogin}</td>
                     </tr>
                 ))}
             </tbody>

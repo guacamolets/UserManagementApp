@@ -16,14 +16,15 @@ export default function ConfirmEmailPage() {
             return;
         }
 
-        fetch(`https://localhost:7127/api/auth/confirm?token=${token}`, {
-            method: "POST",
+        fetch(`/api/auth/confirm?token=${token}`, {
+            method: "GET",
         })
             .then(res => {
                 if (res.ok) {
                     setStatus("success");
                     setTimeout(() => navigate("/login"), 2000);
                 } else {
+                    alert(`/api/auth/confirm?token=${token}`);
                     setStatus("1 error");
                 }
             })

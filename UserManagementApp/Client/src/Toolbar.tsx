@@ -14,7 +14,7 @@ export default function Toolbar({ selectedIds, onAction }: Props) {
 
         console.log("Executing action", action, selectedIds);
 
-        await apiFetch("https://localhost:7127/api/users", {
+        await apiFetch("/api/users", {
             method: "POST",
             body: JSON.stringify({ userIds: selectedIds, action: action })
         });

@@ -10,7 +10,7 @@ export default function LoginPage() {
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
 
-        const res = await fetch("https://localhost:7127/api/auth/login", {
+        const res = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
@@ -30,8 +30,8 @@ export default function LoginPage() {
         <form onSubmit={handleLogin}>
             <h2>Login</h2>
 
-            <input value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+            <div><label>Email</label><input value={email} onChange={e => setEmail(e.target.value)} /></div>
+            <div><label>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} /></div>
 
             <button>Log in</button>
         </form>

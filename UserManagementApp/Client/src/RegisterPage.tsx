@@ -10,7 +10,7 @@ export default function RegisterPage() {
     async function handleRegister(e: React.FormEvent) {
         e.preventDefault();
 
-        const res = await fetch("https://localhost:7127/api/auth/register", {
+        const res = await fetch("/api/auth/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password }),
@@ -28,9 +28,9 @@ export default function RegisterPage() {
         <form onSubmit={handleRegister}>
             <h2>Registration</h2>
 
-            <input value={name} onChange={e => setName(e.target.value)} />
-            <input value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+            <div><label>Name</label><input value={name} onChange={e => setName(e.target.value)} /></div>
+            <div><label>Email</label><input value={email} onChange={e => setEmail(e.target.value)} /></div>
+            <div><label>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} /></div>
 
             <button>Register</button>
         </form>

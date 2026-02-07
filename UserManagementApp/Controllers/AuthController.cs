@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System;
+using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -53,7 +54,8 @@ namespace UserManagementApp.Controllers
 
             try
             {
-                var confirmationLink = $"http://localhost:5173/confirm?token={user.EmailConfirmationToken}";
+                var confirmationLink = $"{_configuration["FrontendUrl"]}/confirm?token={user.EmailConfirmationToken}";
+                
                 await _context.SaveChangesAsync();
 
                 //Task.Run(() => _emailService.SendConfirmationEmailAsync(user.Email, confirmationLink));
@@ -76,6 +78,7 @@ namespace UserManagementApp.Controllers
             return Ok(new { message = "Registration successful, status unverified" });
         }
 
+        [AllowAnonymous]
         [HttpGet("confirm")]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string token)
         {

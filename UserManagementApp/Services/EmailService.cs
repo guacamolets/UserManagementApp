@@ -1,6 +1,5 @@
 ﻿using MailKit.Security;
 using Microsoft.Extensions.Options;
-using MailKit.Net.Smtp;
 using MimeKit;
 using UserManagementApp.Entities;
 

@@ -12,7 +12,7 @@ export default function UserPage() {
 
     async function loadUsers() {
         try {
-            const data = await apiFetch("https://localhost:7127/api/users");
+            const data = await apiFetch("/api/users");
             setUsers(data);
             setSelectedIds([]);
         } catch (err) {
