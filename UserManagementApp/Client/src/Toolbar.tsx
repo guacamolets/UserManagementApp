@@ -1,4 +1,6 @@
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "./api";
+import { logout } from "./auth";
 
 interface Props {
     selectedIds: number[];
@@ -6,6 +8,8 @@ interface Props {
 }
 
 export default function Toolbar({ selectedIds, onAction }: Props) {
+    const navigate = useNavigate();
+
     async function executeAction(action: string) {
         if (selectedIds.length === 0) {
             console.warn("No users selected");
@@ -18,6 +22,14 @@ export default function Toolbar({ selectedIds, onAction }: Props) {
             method: "POST",
             body: JSON.stringify({ userIds: selectedIds, action: action })
         });
+
+        const currentUserId = Number(localStorage.getItem("userId"));
+        if (action === "Block" && selectedIds.includes(currentUserId)) {
+            localStorage.removeItem("userId");
+            logout();
+            navigate("/login");
+            return;
+        }
 
         onAction();
     }

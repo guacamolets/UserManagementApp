@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { setToken } from "./auth";
+import { setToken, setUserId } from "./auth";
 import { useToastContext } from "./ToastContext";
 
 export default function LoginPage() {
@@ -25,7 +25,9 @@ export default function LoginPage() {
 
         const data = await res.json();
         setToken(data.token);
-        navigate("/users");
+        setUserId(data.id.toString());
+
+        navigate(`/users`);
     }
 
     return (

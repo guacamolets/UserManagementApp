@@ -120,7 +120,7 @@ namespace UserManagementApp.Controllers
 
             var token = GenerateJwtToken(user);
 
-            return Ok(new { token });
+            return Ok(new { user.Id, token });
         }
 
         private string GenerateJwtToken(User user)
