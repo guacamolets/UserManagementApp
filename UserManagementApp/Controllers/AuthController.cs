@@ -39,6 +39,7 @@ namespace UserManagementApp.Controllers
                 Name = dto.Name,
                 Email = dto.Email,
                 Status = "unverified",
+                IsEmailConfirmed = false,
                 LastLogin = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
                 PasswordHash = dto.Password,
@@ -88,6 +89,7 @@ namespace UserManagementApp.Controllers
                 return BadRequest("Invalid or expired token");
 
             user.Status = "active";
+            user.IsEmailConfirmed = true;
             user.EmailConfirmationToken = string.Empty;
 
             await _context.SaveChangesAsync();

@@ -13,5 +13,6 @@ namespace UserManagementApp.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string EmailConfirmationToken { get; set; }
         public DateTime? EmailConfirmationTokenExpires { get; set; }
+        public bool IsEmailConfirmed { get; set; }
     }
 }

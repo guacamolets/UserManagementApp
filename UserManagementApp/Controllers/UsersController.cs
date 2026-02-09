@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using UserManagementApp.Data;
 using UserManagementApp.Dto;
+using UserManagementApp.Entities;
 
 namespace UserManagementApp.Controllers
 {
@@ -52,7 +54,7 @@ namespace UserManagementApp.Controllers
                     users.ForEach(u => u.Status = "blocked");
                     break;
                 case UserAction.Unblock:
-                    users.ForEach(u => u.Status = "active");
+                    users.ForEach(u => u.Status = u.IsEmailConfirmed ? "active" : "unverified");
                     break;
                 case UserAction.Delete:
                     _context.Users.RemoveRange(users);
@@ -65,7 +67,10 @@ namespace UserManagementApp.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return Ok(new { message = "Action completed successfully" });
+
+            var currentUser = _context.Users.Find(dto.CurrentUserId);
+            var isCurrentUserActive = currentUser != null && currentUser.Status != "blocked";
+            return Ok(new { isCurrentUserActive });
         }
     }
 }

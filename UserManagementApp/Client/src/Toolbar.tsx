@@ -16,15 +16,16 @@ export default function Toolbar({ selectedIds, onAction }: Props) {
             return;
         }
 
+        const currentUserId = Number(localStorage.getItem("userId"))
+
         console.log("Executing action", action, selectedIds);
 
-        await apiFetch("/api/users", {
+        const data = await apiFetch("/api/users", {
             method: "POST",
-            body: JSON.stringify({ userIds: selectedIds, action: action })
+            body: JSON.stringify({ userIds: selectedIds, currentUserId: currentUserId, action: action })
         });
 
-        const currentUserId = Number(localStorage.getItem("userId"));
-        if (action === "Block" && selectedIds.includes(currentUserId)) {
+        if (!data.isCurrentUserActive) {
             localStorage.removeItem("userId");
             logout();
             navigate("/login");
