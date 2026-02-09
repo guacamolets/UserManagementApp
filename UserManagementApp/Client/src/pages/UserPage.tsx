@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { apiFetch } from "./api";
-import { type UserDto } from "./User";
-import Toolbar from "./Toolbar";
-import UserTable from "./UserTable";
-import { useToastContext } from "./ToastContext";
+import { apiFetch } from "../api";
+import { type UserDto } from "../components/user/User";
+import Toolbar from "../components/bars/Toolbar";
+import UserTable from "../components/user/UserTable";
+import { useToastContext } from "../components/toast/ToastContext";
 
 export default function UserPage() {
     const [users, setUsers] = useState<UserDto[]>([]);

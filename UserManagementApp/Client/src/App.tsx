@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState, type JSX } from "react";
 import { getToken, logout } from "./auth";
-import LoginPage from "./LoginPage";
-import RegisterPage from "./RegisterPage";
-import UserPage from "./UserPage";
-import ConfirmEmailPage from "./ConfirmEmailPage";
-import NavigationBar from "./NavigationBar";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import UserPage from "./pages/UserPage";
+import ConfirmEmailPage from "./pages/ConfirmEmailPage";
+import NavigationBar from "./components/bars/NavigationBar";
 import './App.css'
 
 function PrivateRoute({ children }: { children: JSX.Element }) {

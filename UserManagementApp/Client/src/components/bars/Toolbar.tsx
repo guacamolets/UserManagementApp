@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { apiFetch } from "./api";
-import { getUserId, logout } from "./auth";
+import { apiFetch } from "../../api";
+import { getUserId, logout } from "../../auth";
 
 interface Props {
     selectedIds: number[];
