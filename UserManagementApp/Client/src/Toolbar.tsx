@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "./api";
-import { logout } from "./auth";
+import { getUserId, logout } from "./auth";
 
 interface Props {
     selectedIds: number[];
@@ -16,7 +16,7 @@ export default function Toolbar({ selectedIds, onAction }: Props) {
             return;
         }
 
-        const currentUserId = Number(localStorage.getItem("userId"))
+        const currentUserId = Number(getUserId())
 
         console.log("Executing action", action, selectedIds);
 
@@ -26,8 +26,8 @@ export default function Toolbar({ selectedIds, onAction }: Props) {
         });
 
         if (!data.isCurrentUserActive) {
-            localStorage.removeItem("userId");
             logout();
+            window.dispatchEvent(new Event("storage"));
             navigate("/login");
             return;
         }
@@ -38,7 +38,7 @@ export default function Toolbar({ selectedIds, onAction }: Props) {
     const disabled = selectedIds.length === 0;
 
     return (
-        <div>
+        <div className="toolbar">
             <button disabled={disabled} title="Blocks selected users and prevents login" onClick={() => executeAction("Block")}>Block</button>
             <button disabled={disabled} title="Unblock selected users and allow login" onClick={() => executeAction("Unblock")}>Unblock</button>
             <button disabled={disabled} title="Delete selected users permanently" onClick={() => executeAction("Delete")}>Delete</button>

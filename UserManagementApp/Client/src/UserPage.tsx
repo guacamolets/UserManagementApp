@@ -43,11 +43,11 @@ export default function UserPage() {
     }
 
     return (
-        <>
+        <div className="users-container">
             <Toolbar onAction={loadUsers} selectedIds={selectedIds}/>
             <UserTable users={users} selectedIds={selectedIds}
                 onToggle={toggleUser} onToggleAll={toggleAllUser}
             />
-        </>
+        </div>
     );
 }
